@@ -1,0 +1,19 @@
+{
+  "name": "phonebridge-chromebook",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "PhoneBridge Chromebook client \u2014 single-file HTML remote browser over Web Bluetooth",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "build": "node tools/build.mjs",
+    "vectors": "node tools/gen-vectors.mjs",
+    "test:e2e": "node tests/e2e/run.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "puppeteer-core": "^23.0.0"
+  }
+}

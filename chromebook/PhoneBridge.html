@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en" data-theme="system" data-density="comfortable">
+<head>
+<meta charset="utf-8">
+<!-- PB:CSP -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>PhoneBridge</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header id="toolbar">
+  <div class="nav">
+    <button id="btn-back" class="icon" title="Back (Alt+←)" disabled>
+      <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <button id="btn-fwd" class="icon" title="Forward (Alt+→)" disabled>
+      <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+    <button id="btn-reload" class="icon" title="Reload (Ctrl+R)" disabled>
+      <svg class="i-reload" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5"/></svg>
+      <svg class="i-stop" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <button id="btn-home" class="icon" title="Home" disabled>
+      <svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg></button>
+  </div>
+  <form id="nav-form" autocomplete="off">
+    <span id="lock" title="Loaded on the iPhone"></span>
+    <input id="address" type="text" spellcheck="false" placeholder="Search or enter address" aria-label="Address" disabled>
+  </form>
+  <div id="indicators">
+    <span id="ind-rate" class="ind" title="Link throughput and frames per second"></span>
+    <span id="ind-net" class="ind" title="iPhone network"></span>
+    <span id="ind-batt" class="ind" title="iPhone battery"></span>
+    <span id="ind-link" class="ind link" title="Bluetooth link"><i></i><b>Offline</b></span>
+  </div>
+  <button id="btn-settings" class="icon" title="Settings (Ctrl+,)">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+  <div id="progress"></div>
+</header>
+
+<main id="stage">
+  <canvas id="screen" tabindex="0" width="960" height="600" aria-label="Remote browser"></canvas>
+  <div id="overlay"><div class="card" id="card" role="dialog" aria-live="polite"></div></div>
+</main>
+
+<aside id="settings" aria-label="Settings" hidden>
+  <header><h2>Settings</h2><button id="settings-close" class="icon" title="Close (Esc)">
+    <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
+  <nav id="settings-nav"></nav>
+  <div id="settings-body"></div>
+</aside>
+
+<dialog id="modal"><form method="dialog" id="modal-form"></form></dialog>
+<div id="toasts" aria-live="polite"></div>
+
+<script src="src/bytes.js"></script>
+<script src="src/protocol.js"></script>
+<script src="src/crypto.js"></script>
+<script src="src/storage.js"></script>
+<script src="src/session.js"></script>
+<script src="src/bluetooth.js"></script>
+<script src="src/renderer.js"></script>
+<script src="src/input.js"></script>
+<script src="src/settings.js"></script>
+<script src="src/interface.js"></script>
+</body>
+</html>

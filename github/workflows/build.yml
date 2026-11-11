@@ -1,0 +1,111 @@
+name: Build
+
+on:
+  push:
+    branches: ["**"]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  chromebook:
+    name: Chromebook client
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: chromebook
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: chromebook/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - name: Unit + protocol tests (incl. cross-language vectors)
+        run: npm test
+      - name: Build single-file PhoneBridge.html
+        run: npm run build
+      - name: End-to-end UI test (headless Chrome + mock iPhone)
+        run: npm run test:e2e
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PhoneBridge-chromebook
+          path: chromebook/dist/PhoneBridge.html
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-screenshots
+          path: chromebook/dist/e2e-shots
+          if-no-files-found: ignore
+
+  core:
+    name: Swift core tests
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - run: swift --version
+      - name: PhoneBridgeCore tests (handshake, vectors, framing, PBKDF2)
+        run: swift test --package-path ios/PhoneBridgeCore
+
+  ios:
+    name: iOS app (unsigned IPA)
+    runs-on: macos-15
+    needs: core
+    steps:
+      - uses: actions/checkout@v4
+      - run: xcodebuild -version
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate Xcode project
+        run: xcodegen generate --spec ios/project.yml
+      - name: Build (no code signing)
+        run: |
+          xcodebuild \
+            -project ios/PhoneBridge.xcodeproj \
+            -scheme PhoneBridge \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            -quiet \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+            build
+      - name: Package IPA
+        run: |
+          APP=build/Build/Products/Release-iphoneos/PhoneBridge.app
+          test -d "$APP"
+          mkdir -p out/Payload
+          cp -R "$APP" out/Payload/
+          (cd out && zip -qry ../PhoneBridge-unsigned.ipa Payload)
+          ls -lh PhoneBridge-unsigned.ipa
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PhoneBridge-ios
+          path: PhoneBridge-unsigned.ipa
+          if-no-files-found: error
+
+  release:
+    name: GitHub release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [chromebook, ios]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/PhoneBridge-ios/PhoneBridge-unsigned.ipa
+            artifacts/PhoneBridge-chromebook/PhoneBridge.html
+          generate_release_notes: true
